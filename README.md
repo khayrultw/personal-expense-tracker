@@ -35,7 +35,7 @@ The project follows a clean architecture approach, organized by feature and laye
     - `base/`: Shared base classes for ViewModels and UI.
     - `composables/`: Reusable UI components.
     - `theme/`: Material 3 theme configuration (Color, Type, Shape).
-    - `nav/`: Navigation graphs and screen definitions.
+    - `nav/`: Navigation and screen definitions.
 - `di/`: Koin modules for dependency injection.
 
 ## Getting Started
