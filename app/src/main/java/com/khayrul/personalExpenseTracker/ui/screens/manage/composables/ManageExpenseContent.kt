@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.khayrul.personalExpenseTracker.data.model.Category
-import com.khayrul.personalExpenseTracker.ui.utils.DateUtils.millisToDateString
+import com.khayrul.personalExpenseTracker.ui.utils.millisToDateString
 import androidx.compose.ui.res.stringResource
 import com.khayrul.personalExpenseTracker.R
 import com.khayrul.personalExpenseTracker.ui.screens.manage.base.ManageUiState
@@ -24,6 +24,7 @@ import com.khayrul.personalExpenseTracker.ui.screens.manage.base.ManageUiState
 @Composable
 fun ManageExpenseContent(
     uiState: ManageUiState,
+    onTitleChange: (String) -> Unit,
     onAmountChange: (Double) -> Unit,
     onNoteChange: (String) -> Unit,
     onCategoryChange: (Category) -> Unit,
@@ -33,12 +34,14 @@ fun ManageExpenseContent(
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     var amountText by rememberSaveable { mutableStateOf("") }
-    var hasInitializedAmount by rememberSaveable { mutableStateOf(false) }
 
-    if (!hasInitializedAmount && uiState.amount > 0) {
-        amountText = uiState.amount.toString()
-        hasInitializedAmount = true
+    LaunchedEffect(uiState.amount) {
+        val parsed = amountText.toDoubleOrNull()
+        if(uiState.amount > 0 && parsed != uiState.amount) {
+            amountText = uiState.amount.toString()
+        }
     }
+
 
     Column(
         modifier = Modifier
@@ -48,6 +51,8 @@ fun ManageExpenseContent(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(Modifier.weight(1f))
+
         CategoryDropdown(
             selectedCategory = uiState.category,
             categories = uiState.categories,
@@ -55,9 +60,19 @@ fun ManageExpenseContent(
         )
 
         OutlinedTextField(
-            value = amountText,
+            value = uiState.title,
             onValueChange = { value ->
-                amountText = value
+                onTitleChange(value)
+            },
+            label = { Text(stringResource(R.string.title)) },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            shape = RoundedCornerShape(12.dp)
+        )
+
+        OutlinedTextField(
+            value = uiState.amount.toString(),
+            onValueChange = { value ->
                 value.toDoubleOrNull()?.let { onAmountChange(it) }
             },
             label = { Text(stringResource(R.string.amount)) },
@@ -70,7 +85,7 @@ fun ManageExpenseContent(
 
         OutlinedTextField(
             value = millisToDateString(uiState.date),
-            onValueChange = {},
+            onValueChange = { },
             readOnly = true,
             label = { Text(stringResource(R.string.date)) },
             trailingIcon = {
@@ -97,7 +112,6 @@ fun ManageExpenseContent(
             onClick = onSaveClick,
             modifier = Modifier.fillMaxWidth()
                 .height(56.dp),
-            enabled = uiState.category != null && uiState.amount > 0,
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(saveButtonText, style = MaterialTheme.typography.titleMedium)

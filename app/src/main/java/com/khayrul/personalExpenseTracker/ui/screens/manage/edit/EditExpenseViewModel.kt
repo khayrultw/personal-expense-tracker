@@ -3,7 +3,7 @@ package com.khayrul.personalExpenseTracker.ui.screens.manage.edit
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.khayrul.personalExpenseTracker.data.model.Expense
+import com.khayrul.personalExpenseTracker.core.ResourceProvider
 import com.khayrul.personalExpenseTracker.data.repo.CategoryRepo
 import com.khayrul.personalExpenseTracker.data.repo.ExpenseRepo
 import com.khayrul.personalExpenseTracker.ui.navHost.Screen
@@ -14,9 +14,10 @@ import kotlinx.coroutines.launch
 
 class EditExpenseViewModel(
     savedStateHandle: SavedStateHandle,
+    resourceProvider: ResourceProvider,
     categoryRepo: CategoryRepo,
     private val expenseRepo: ExpenseRepo
-): BaseManageViewModel(categoryRepo) {
+): BaseManageViewModel(resourceProvider, categoryRepo) {
 
     private val expenseId = savedStateHandle.toRoute<Screen.EditExpense>().expenseId
     init {
@@ -27,8 +28,9 @@ class EditExpenseViewModel(
         viewModelScope.launch {
             val expenseWithCategory = expenseRepo.getExpenseById(expenseId)
             expenseWithCategory?.let { item ->
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
+                        title = item.expense.title,
                         amount = item.expense.amount,
                         note = item.expense.note,
                         category = item.category,
@@ -41,16 +43,12 @@ class EditExpenseViewModel(
 
     fun update() {
         viewModelScope.launch(Dispatchers.IO) {
-            val state = uiState.value
-            val expense = Expense(
-                id = expenseId,
-                amount = state.amount,
-                note = state.note,
-                categoryId = state.category!!.id!!,
-                date = state.date
-            )
-            expenseRepo.updateExpense(expense)
-            _finish.emit(Unit)
+            errorHandler {
+                validate()
+                val expense = getExpense(expenseId)
+                expenseRepo.updateExpense(expense)
+                _finish.emit(Unit)
+            }
         }
     }
 }

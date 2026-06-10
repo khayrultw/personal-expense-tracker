@@ -17,8 +17,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.khayrul.personalExpenseTracker.core.utils.truncate
 import com.khayrul.personalExpenseTracker.data.model.ExpenseWithCategory
-import com.khayrul.personalExpenseTracker.ui.utils.DateUtils.millisToDateString
+import com.khayrul.personalExpenseTracker.ui.utils.millisToDateString
 
 
 @Composable
@@ -48,15 +49,26 @@ fun ExpenseItem(
             ) {
                 Column {
                     Text(
-                        text = expense.category.name,
+                        text = expense.expense.title.truncate(30),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
-                    Text(
-                        text = millisToDateString(expense.expense.date),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = millisToDateString(expense.expense.date),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Text(
+                            text = expense.category.name.truncate(30),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
             Text(

@@ -7,4 +7,17 @@ import kotlinx.coroutines.flow.asSharedFlow
 abstract class BaseViewModel: ViewModel() {
     protected val _finish = MutableSharedFlow<Unit>()
     val finish = _finish.asSharedFlow()
+
+    protected val _error = MutableSharedFlow<String>()
+    val error = _error.asSharedFlow()
+
+    suspend fun <T> errorHandler(func: suspend () -> T?): T? {
+        return try {
+            func.invoke()
+        } catch (e: Exception) {
+            _error.emit(e.message ?: "Unknown error")
+            null
+        }
+    }
+
 }

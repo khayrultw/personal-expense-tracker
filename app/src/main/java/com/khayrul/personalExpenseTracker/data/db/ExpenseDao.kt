@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ExpenseDao {
-    @Query("SELECT * FROM Expense")
+    @Query("SELECT * FROM Expense ORDER BY date DESC")
     fun getAllExpenses(): Flow<List<ExpenseWithCategory>>
 
     @Query("SELECT * FROM Expense WHERE id = :id")
